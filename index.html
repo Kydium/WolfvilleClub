@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#070B14">
+<title>Wolvevilles v2.3.0</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<style>
+:root{--bg:#070B14;--s1:#0C1322;--s2:#111A2E;--s3:#18233C;--b:#1E2B45;--b2:#2A3B5E;--t:#DCE6F7;--t2:#8A9BBD;--t3:#5A6C8C;--gold:#E0B43A;--red:#E04848;--green:#3CC47C;--blue:#5B8CFF}
+body.day{--bg:#E9F0F8;--s1:#FFFFFF;--s2:#F5F8FC;--s3:#E4EBF4;--b:#CFD9E6;--b2:#AFC0D6;--t:#101B30;--t2:#40527A;--t3:#7385A5;--gold:#A87A08}
+body.night{--bg:#03050B;--s1:#080C18;--s2:#0C1222;--s3:#121A2E;--b:#18223A;--b2:#223050}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--t);font-family:-apple-system,system-ui,"Segoe UI",Roboto,sans-serif;transition:background .8s,color .8s;touch-action:manipulation}
+#hdr{position:sticky;top:0;z-index:50;display:none;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;background:var(--bg);border-bottom:1px solid var(--b);transition:background .8s}
+#hdr.on{display:flex}
+#hdr-d{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+#hdr-l{font-size:14px;font-weight:800}
+#hdr-s{font-size:12px;color:var(--t3)}
+#hdr-t{margin-left:auto;font-size:20px;font-weight:900;font-variant-numeric:tabular-nums}
+#hdr-t.low{color:var(--red)}
+#app{max-width:460px;margin:0 auto;padding:16px 16px calc(60px + env(safe-area-inset-bottom))}
+.scr{display:none}.scr.on{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.card{background:var(--s2);border:1px solid var(--b);border-radius:14px;padding:14px;margin-bottom:12px;transition:background .8s,border-color .8s}
+.lbl{font-size:10px;font-weight:800;letter-spacing:1.8px;color:var(--t3);text-transform:uppercase;margin-bottom:9px}
+.rowb{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.rowb .lbl{margin:0}
+input{width:100%;padding:12px 14px;border-radius:11px;border:1px solid var(--b);background:var(--s1);color:var(--t);font-size:16px;font-family:inherit;outline:none}
+input:focus{border-color:var(--blue)}
+input:disabled{opacity:.5}
+.btn{display:block;width:100%;padding:14px;border-radius:12px;border:none;cursor:pointer;font-size:15px;font-weight:800;font-family:inherit;margin-bottom:9px;text-align:center;transition:transform .1s,opacity .2s}
+.btn:active{transform:scale(.97)}.btn:disabled{opacity:.35;cursor:default;transform:none}
+.b-pri{background:#2D5BD8;color:#fff}
+.b-red{background:#B8322F;color:#fff}
+.b-grn{background:#1F8F55;color:#fff}
+.b-gh{background:transparent;color:var(--t2);border:1px solid var(--b2)}
+.btn.sm{display:inline-block;width:auto;padding:8px 14px;font-size:13px;margin:0}
+.btn.on{outline:2px solid var(--gold)}
+.hero{text-align:center;padding:22px 0 18px}
+.logo{font-size:56px}
+.title{font-size:30px;font-weight:900;letter-spacing:4px;text-transform:uppercase;color:var(--gold)}
+.sub{color:var(--t2);font-size:13px;margin-top:4px}
+.conn{font-size:12px;color:var(--t3);margin-top:10px}
+.codein{font-size:30px;text-align:center;letter-spacing:12px;font-weight:900;text-transform:uppercase}
+.or{display:flex;align-items:center;gap:10px;margin:8px 0 14px;color:var(--t3);font-size:12px}
+.or::before,.or::after{content:'';flex:1;height:1px;background:var(--b)}
+.rules summary{cursor:pointer;font-weight:800;font-size:14px}
+.rules p{font-size:13px;color:var(--t2);line-height:1.6;margin-top:8px}
+.code{font-size:42px;font-weight:900;letter-spacing:10px;color:var(--gold);font-family:ui-monospace,Menlo,Consolas,monospace;margin:2px 0 10px}
+.center{text-align:center}
+.prow{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:11px;background:var(--s1);border:1px solid var(--b);margin-bottom:6px;font-size:14px}
+.prow.off{opacity:.45}
+.prow.win{border-color:var(--gold)}
+.prow small{color:var(--t3);font-size:11px}
+.crown{font-size:11px;color:var(--gold);font-weight:800}
+.strike{text-decoration:line-through;opacity:.6}
+.stp{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--b)}
+.stp:last-child{border:none}
+.stp-n{font-size:15px;cursor:pointer}
+.stp-b{display:flex;align-items:center;gap:12px}
+.stp-b button{width:36px;height:36px;border-radius:10px;border:1px solid var(--b2);background:var(--s1);color:var(--t);font-size:20px;cursor:pointer;font-family:inherit}
+.stp-v{min-width:22px;text-align:center;color:var(--gold);font-size:18px;font-weight:900}
+.note{text-align:center;font-size:13px;color:var(--t2);margin:6px 0 12px}
+.muted{color:var(--t3);font-size:12px}
+.hint{font-size:12px;color:var(--t2);text-align:center;margin-top:12px;line-height:1.5}
+.vlist{font-size:12px;color:var(--t3);margin-top:8px;line-height:1.7;text-align:center}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pc{position:relative;background:var(--s1);border:1.5px solid var(--b);border-radius:13px;padding:11px 5px 8px;text-align:center;user-select:none;-webkit-user-select:none;transition:transform .1s,border-color .15s,background .15s}
+.pc.tap{cursor:pointer}
+.pc.tap:active{transform:scale(.93)}
+.pc.me{border-style:dashed}
+.pc.sel{border-color:var(--red);background:rgba(224,72,72,.14)}
+.pc.selg{border-color:var(--green);background:rgba(60,196,124,.14)}
+.pc.selb{border-color:var(--blue);background:rgba(91,140,255,.14)}
+.pc.dead{background:rgba(224,72,72,.06);border-color:rgba(224,72,72,.35)}
+.pc.off{opacity:.5}
+.pc .av{width:46px;height:46px;border-radius:50%;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff}
+.pc.dead .av{background:#3A1418!important;font-size:22px;filter:grayscale(.3)}
+.nm{font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc.dead .nm{text-decoration:line-through;color:var(--red)}
+.sb{font-size:10.5px;color:var(--t3);margin-top:2px;min-height:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc.dead .sb{color:var(--red)}
+.bdg{position:absolute;top:-7px;right:-6px;min-width:23px;height:23px;padding:0 6px;border-radius:12px;background:var(--red);color:#fff;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)}
+.tag{position:absolute;top:4px;left:6px;font-size:14px}
+.av.sm{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;flex-shrink:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:66px;padding:8px 6px;border-radius:12px;border:1px solid;cursor:pointer;user-select:none;transition:transform .1s}
+.chip:active{transform:scale(.92)}
+.chip b{font-size:11px}
+.chip i{font-style:normal;font-size:10px;color:#DCE6F7;opacity:.8}
+.narr{background:var(--s2);border:1px solid var(--b);border-left:4px solid var(--gold);border-radius:12px;padding:12px 14px;font-size:14.5px;line-height:1.6;margin-bottom:12px}
+.banner{border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:14px;text-align:center}
+.deadb{background:rgba(224,72,72,.12);border:1px solid rgba(224,72,72,.45);color:var(--red);font-weight:700}
+.wolfbox{background:#1B0709;border-color:#5A1A20}
+.wchip{display:inline-block;padding:5px 11px;margin:3px;border-radius:20px;background:#3A0E13;color:#FF9A9A;font-size:13px;font-weight:700}
+.wchip.dead{opacity:.45;text-decoration:line-through}
+.res{border-radius:12px;padding:18px;text-align:center;margin-bottom:6px}
+.res.w{background:rgba(224,72,72,.14);border:1px solid rgba(224,72,72,.5)}
+.res.v{background:rgba(60,196,124,.14);border:1px solid rgba(60,196,124,.5)}
+.res .big{font-size:40px;margin:6px 0}
+.moon{text-align:center;padding:34px 14px}
+.moon .big{font-size:58px;margin-bottom:12px}
+.moon p{color:var(--t2);font-size:15px;line-height:1.6}
+.hist{font-size:13px;line-height:1.9}
+.pbtns{display:flex;gap:10px;margin-bottom:12px}
+.pbtns .btn{margin:0}
+.chat{display:flex;flex-direction:column;height:240px;border:1px solid var(--b);border-radius:13px;overflow:hidden;background:var(--s1);margin-bottom:12px;transition:background .8s}
+.msgs{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:5px}
+.msg{font-size:13.5px;line-height:1.45;word-break:break-word}
+.msg b{margin-right:5px}
+.msg.sys{color:var(--t3);font-style:italic;font-size:12px}
+.cin{display:flex;border-top:1px solid var(--b)}
+.cin input{border:none;border-radius:0;background:transparent}
+.cin button{border:none;background:transparent;color:var(--gold);font-size:20px;padding:0 16px;cursor:pointer}
+.elim{text-align:center;padding:40px 14px}
+.elim .big{font-size:72px;margin-bottom:12px}
+.elim h2{font-size:24px;margin-bottom:6px}
+.rolecard{border-radius:16px;padding:26px 18px;text-align:center;margin-bottom:12px;border:2px solid;color:#E6EEF8}
+.rolecard .big{font-size:60px;margin-bottom:8px}
+.rolecard h2{font-size:26px;margin-bottom:10px}
+.rolecard p{font-size:14px;line-height:1.6;opacity:.9}
+.rbadge{font-size:11px;font-weight:800;padding:3px 8px;border-radius:20px;border:1px solid;white-space:nowrap}
+.overhead{text-align:center;padding:20px 0}
+.overhead .big{font-size:70px}
+.overhead h2{font-size:26px;margin:8px 0 4px}
+#modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.78);z-index:200;padding:20px}
+#modal.on{display:flex}
+#mbox{width:100%;max-width:320px;border-radius:16px;padding:24px 20px;text-align:center;border:2px solid;color:#E6EEF8}
+#mbox .big{font-size:56px}
+#mbox h3{font-size:22px;margin:6px 0 10px}
+#mbox p{font-size:14px;line-height:1.65;margin-bottom:16px;opacity:.9}
+#toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:#1E2A44;color:#fff;padding:12px 16px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:300;max-width:90%;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#toast.err{background:#9E2B2B}
+#offline{position:fixed;top:0;left:0;right:0;background:#9E2B2B;color:#fff;text-align:center;font-size:13px;padding:calc(6px + env(safe-area-inset-top)) 6px 6px;z-index:400;display:none}
+.srb{display:inline-block;font-size:11px;font-weight:900;padding:2px 8px;border-radius:20px;border:1px solid;white-space:nowrap}
+.srcard{text-align:center}
+.srbig{font-size:44px;line-height:1}
+.srname{font-size:20px;font-weight:900;margin-top:6px}
+.srval{font-size:30px;font-weight:900;font-variant-numeric:tabular-nums;margin-top:2px}
+.bar{height:8px;border-radius:6px;background:var(--s3);overflow:hidden;margin:10px 0 6px}
+.bar i{display:block;height:100%;border-radius:6px;transition:width .6s}
+.stats{display:flex;justify-content:space-around;margin-top:10px;font-size:12px;color:var(--t3)}
+.stats b{display:block;font-size:17px;color:var(--t)}
+.lbrow{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--b);font-size:14px}
+.lbrow:last-child{border:none}
+.lbrow.me{background:rgba(224,180,58,.1);border-radius:8px}
+.lbpos{width:26px;text-align:center;font-weight:900;color:var(--t3)}
+.dsr{font-weight:900;font-size:13px;min-width:44px;text-align:right}
+.dsr.up{color:var(--green)}.dsr.dn{color:var(--red)}
+.srgain{font-size:28px;font-weight:900;margin-top:6px}
+.ver{text-align:center;font-size:11px;color:var(--t3);margin-top:14px;cursor:pointer;text-decoration:underline}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:4px}
+</style>
+</head>
+<body>
+<div id="offline">🔴 Sin conexión — reconectando...</div>
+<div id="hdr"><div id="hdr-d"></div><div><div id="hdr-l"></div><div id="hdr-s"></div></div><div id="hdr-t"></div></div>
+<div id="app">
+
+<section id="s-home" class="scr on">
+  <div class="hero"><div class="logo">🐺</div><h1 class="title">Wolvevilles</h1><p class="sub">El juego de los lobos, online con tus amigos</p><p id="conn" class="conn">⏳ Conectando...</p></div>
+  <div id="rj" class="card" style="display:none;border-color:var(--gold)">
+    <div class="lbl" style="color:var(--gold)">Tienes una partida en curso</div>
+    <div style="display:flex;gap:8px"><button class="btn b-pri" style="margin:0" data-act="rejoin">Volver a la sala <b id="rj-code"></b></button><button class="btn b-gh" style="width:auto;margin:0;padding:14px 16px" data-act="dismiss">✕</button></div>
+  </div>
+  <div id="h-sr" class="card srcard"></div>
+  <div class="card"><div class="lbl">Tu nombre</div><input id="h-name" maxlength="14" placeholder="¿Cómo te llamas?" autocomplete="off"></div>
+  <button id="btn-create" class="btn b-pri" data-act="create">✦ Crear partida</button>
+  <div class="or">o únete a una sala</div>
+  <div class="card"><div class="lbl">Código de sala</div><input id="h-code" class="codein" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters"></div>
+  <button id="btn-join" class="btn b-gh" data-act="join">Unirse →</button>
+  <details class="card rules"><summary>📖 ¿Cómo se juega?</summary>
+    <p>Cada jugador recibe un rol secreto. De <b>noche</b>, los roles especiales actúan a la vez desde su celular: los lobos eligen víctima, la vidente investiga, el médico protege y el pirómano empapa o incendia.</p>
+    <p>De <b>día</b>, todos debaten en el chat y votan tocando a un jugador. Pueden cambiar su voto hasta que termine el tiempo. El más votado es eliminado; si hay empate, nadie muere.</p>
+    <p>Todo avanza solo: cuando todos terminan o se acaba el tiempo, pasa a la siguiente fase. Toca cualquier rol para ver qué hace.</p>
+  </details>
+  <div class="card"><div class="rowb"><div class="lbl">🏆 Mejores jugadores</div><span class="muted" data-act="ranks" style="cursor:pointer;text-decoration:underline">Ver rangos</span></div><div id="h-lb"><p class="muted">Cargando...</p></div></div>
+  <p class="ver ver-lbl" data-act="ver"></p>
+</section>
+
+<section id="s-lobby" class="scr">
+  <div class="card center"><div class="lbl">Código de la sala</div><div id="l-code" class="code">----</div><button class="btn b-gh sm" data-act="share">📤 Compartir código</button></div>
+  <div class="card"><div class="lbl">Jugadores</div><div id="l-players"></div></div>
+  <div class="card"><div class="rowb"><div class="lbl">Roles en la partida</div><span class="muted">Toca un rol para ver qué hace</span></div><div id="l-roles"></div></div>
+  <div id="l-cfg" class="card" style="display:none"><div class="lbl">Configurar roles (host)</div><div id="l-cfg-rows"></div></div>
+  <p id="l-note" class="note"></p>
+  <button id="l-start" class="btn b-grn" data-act="start" style="display:none">▶ Iniciar partida</button>
+  <button class="btn b-gh" data-act="leave">Salir de la sala</button>
+  <p class="ver ver-lbl" data-act="ver"></p>
+</section>
+
+<section id="s-reveal" class="scr">
+  <p class="note">🤫 Solo tú puedes ver esto</p>
+  <div id="r-card"></div>
+  <button id="r-ack" class="btn b-pri" data-act="ack">Entendido, estoy listo ✓</button>
+  <p id="r-wait" class="note"></p>
+</section>
+
+<section id="s-night" class="scr">
+  <div id="n-panel"></div>
+  <div id="n-wolf" style="display:none">
+    <div class="lbl">🐺 Chat de la manada</div>
+    <div class="chat"><div class="msgs" id="w-msgs"></div><div class="cin"><input id="w-in" maxlength="160" placeholder="Solo los lobos lo ven..." autocomplete="off"><button data-act="sendWolf">➤</button></div></div>
+  </div>
+  <div id="n-jail" style="display:none">
+    <div class="lbl" id="j-title">⛓️ Cárcel</div>
+    <div class="chat"><div class="msgs" id="j-msgs"></div><div class="cin"><input id="j-in" maxlength="160" placeholder="Escribe..." autocomplete="off"><button data-act="sendJail">➤</button></div></div>
+  </div>
+</section>
+
+<section id="s-day" class="scr">
+  <div id="d-narr" class="narr"></div>
+  <div class="card"><div class="rowb"><div class="lbl">Votación</div><span id="d-vs" class="muted"></span></div><div id="d-grid" class="grid"></div><p id="d-hint" class="hint"></p><button id="d-skip" class="btn b-gh" style="margin:12px 0 0" data-act="skip"></button><p id="d-skiph" class="hint" style="margin-top:6px"></p><div id="d-vlist" class="vlist"></div></div>
+  <div id="d-jail" class="card" style="display:none"></div>
+  <div class="lbl">💬 Debate de la aldea</div>
+  <div class="chat"><div class="msgs" id="d-msgs"></div><div class="cin"><input id="d-in" maxlength="160" placeholder="Escribe tu mensaje..." autocomplete="off"><button data-act="sendDay">➤</button></div></div>
+  <div class="card"><div class="rowb"><div class="lbl">Roles en la partida</div><span class="muted">Toca para ver info</span></div><div id="d-roles"></div></div>
+</section>
+
+<section id="s-elim" class="scr"><div id="e-body" class="elim"></div></section>
+
+<section id="s-hunter" class="scr"><div id="h-body"></div></section>
+
+<section id="s-over" class="scr">
+  <div id="o-head" class="overhead"></div>
+  <div id="o-me" class="banner" style="font-weight:800"></div>
+  <div id="o-sr" class="card srcard"></div>
+  <div id="o-narr" class="narr" style="display:none"></div>
+  <div class="card"><div class="lbl">Roles de todos</div><div id="o-list"></div></div>
+  <button id="o-again" class="btn b-grn" data-act="again">🔄 Jugar otra vez (misma sala)</button>
+  <p id="o-wait" class="note">Esperando a que el host inicie otra partida...</p>
+  <button class="btn b-gh" data-act="leave">Salir</button>
+</section>
+
+</div>
+
+<div id="modal" data-act="closeRole"><div id="mbox" data-act="noop"><div id="m-i" class="big"></div><h3 id="m-n"></h3><p id="m-d"></p><button class="btn b-gh" style="margin:0;color:#E6EEF8;border-color:rgba(255,255,255,.3)" data-act="closeRole">Cerrar</button></div></div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+// ===================== CONFIG =====================
+const FB_CFG={apiKey:"AIzaSyBfrs6B-j22O67pnUb5DYq5CevrIg0dtEs",authDomain:"project-349e4491-0828-4f64-bb5.firebaseapp.com",databaseURL:"https://project-349e4491-0828-4f64-bb5-default-rtdb.firebaseio.com",projectId:"project-349e4491-0828-4f64-bb5",storageBucket:"project-349e4491-0828-4f64-bb5.firebasestorage.app",messagingSenderId:"180444249462",appId:"1:180444249462:web:bdf189d171d908a0274e57"};
+const VERSION='2.3.0';
+const CHANGELOG=[
+  ['2.3.0','🗡️ El Cazador ahora se llama Vengador. ⏭️ Botón para saltar el tiempo del día cuando todos están de acuerdo.'],
+  ['2.2.0','⛓️ Nuevo rol: Carcelero (encierra, interroga en secreto y tiene 1 bala). Se muestra la versión y se avisa si alguien tiene otra.'],
+  ['2.1.0','🏆 Sistema de SR con 8 rangos, tabla de mejores jugadores y SR ganado/perdido por partida.'],
+  ['2.0.0','⚙️ Motor estable: fases automáticas, no depende del host, timers sincronizados, reconexión.'],
+  ['1.0.0','🐺 Primera versión: Lobo, Aldeano, Vidente, Médico, Cazador, Bufón y Pirómano.'],
+];
+const T={REVEAL:15000,NIGHT:45000,DAY:180000,ELIM:6000,HUNTER:25000,MIN_PHASE:4000};
+const MIN_PLAYERS=5,MAX_PLAYERS=16;
+
+const R={
+  wolf:{n:'Lobo',i:'🐺',t:'wolves',c:'#FF8A8A',bg:'#2A0B0E',br:'#6E1E24',d:'Cada noche, junto a tu manada, eliges a quién devorar. Los lobos ganan si igualan o superan en número al resto de jugadores vivos.'},
+  villager:{n:'Aldeano',i:'🏡',t:'villagers',c:'#8BF0B4',bg:'#0A2417',br:'#1E6A43',d:'No tienes poderes especiales. Usa el debate y tu voto para descubrir y eliminar a los lobos.'},
+  seer:{n:'Vidente',i:'🔮',t:'villagers',c:'#C9A6FF',bg:'#1A0F33',br:'#4B2E8A',d:'Cada noche puedes investigar a un jugador y descubrir si es lobo o no. Usa esa información con cuidado.'},
+  doctor:{n:'Médico',i:'💉',t:'villagers',c:'#8CC8FF',bg:'#0A1A30',br:'#1F4E86',d:'Cada noche eliges a un jugador para protegerlo del ataque de los lobos. Puedes protegerte a ti mismo.'},
+  hunter:{n:'Vengador',i:'🗡️',t:'villagers',c:'#FFD27A',bg:'#261A05',br:'#735015',d:'Si mueres, de día o de noche, puedes vengarte y llevarte a otro jugador contigo a la tumba.'},
+  bufon:{n:'Bufón',i:'🃏',t:'solo',c:'#FFE08A',bg:'#2A2205',br:'#7A6410',d:'Tu objetivo es ser ahorcado por la aldea. Si te eliminan en la votación, ¡ganas tú solo!'},
+  jailer:{n:'Carcelero',i:'⛓️',t:'villagers',c:'#B8CCE8',bg:'#131B28',br:'#43597A',d:'¡Durante el día puedes seleccionar un jugador para encarcelar durante la siguiente noche! Puedes hablar con el jugador encarcelado de forma anónima. Los jugadores encarcelados no pueden usar su habilidad ni ser atacados. Tienes una bala para matar a un jugador encarcelado durante la noche.'},
+  piro:{n:'Pirómano',i:'🔥',t:'solo',c:'#FFA366',bg:'#2B1105',br:'#83360F',d:'Cada noche puedes empapar hasta dos jugadores con gasolina, o incendiar a todos los empapados, lo que los mata. Empapar atraviesa todas las protecciones y el fuego ignora al médico (pero no la cárcel). Ganas si quedas solo.'},
+};
+const ROLE_ORDER=['wolf','seer','doctor','jailer','hunter','bufon','piro'];
+const NAR={
+  quiet:['🌙 La noche pasó en silencio. Nadie murió.','🌙 Una noche tranquila... quizás demasiado tranquila.','🌙 Los lobos aullaron a lo lejos, pero nadie cayó esta noche.'],
+  saved:['💉 Los lobos atacaron, pero alguien fue salvado en el último instante.','💉 Hubo sangre en una puerta... pero el médico llegó a tiempo.'],
+  wolf:['🐺 {n} fue encontrado sin vida al amanecer.','🐺 Al amanecer, la aldea descubrió el cuerpo de {n}.','🐺 Los lobos devoraron a {n} durante la noche.'],
+};
+const WIN={
+  wolves:{i:'🐺',t:'¡Ganan los lobos!',s:'La oscuridad devoró la aldea.',c:'#FF6B6B'},
+  villagers:{i:'🏡',t:'¡Gana la aldea!',s:'Los lobos fueron expulsados para siempre.',c:'#3CC47C'},
+  bufon:{i:'🃏',t:'¡Gana el Bufón!',s:'La aldea cayó en su trampa y lo ahorcó.',c:'#E6B800'},
+  piro:{i:'🔥',t:'¡Gana el Pirómano!',s:'Las llamas consumieron a todos.',c:'#FF8A3D'},
+  none:{i:'💀',t:'Nadie sobrevivió',s:'La aldea quedó vacía.',c:'#8A9BBD'},
+};
+
+// ===================== SR / RANKS =====================
+const SR_START=1000;
+const RANKS=[[0,'Madera','🪵','#A0785A'],[900,'Bronce','🥉','#CD7F32'],[1100,'Plata','🥈','#AEB8C6'],[1300,'Oro','🥇','#E0B43A'],[1500,'Platino','💠','#3FC9B8'],[1700,'Diamante','💎','#6FA8FF'],[1900,'Maestro','🔮','#B78CFF'],[2100,'Leyenda','👑','#FF6B6B']];
+function rankOf(sr){let r=RANKS[0];for(const x of RANKS)if(sr>=x[0])r=x;return r;}
+function nextRank(sr){return RANKS.find(x=>x[0]>sr)||null;}
+function srBadge(sr){sr=Math.round(sr==null?SR_START:sr);const r=rankOf(sr);return '<span class="srb" style="color:'+r[3]+';border-color:'+r[3]+'">'+r[2]+' '+sr+'</span>';}
+// Ganar: +20 · rol solitario (Bufón/Pirómano): +40 · sobrevivir hasta el final: +5 · Perder: -12
+function srDelta(p,winner){
+  if(!p||!p.role||!winner||winner==='none')return 0;
+  if(isWinner(p,winner)){let d=(R[p.role]&&R[p.role].t==='solo')?40:20;if(p.alive!==false)d+=5;return d;}
+  return -12;
+}
+let MYSR={sr:SR_START,games:0,wins:0};
+const srDone={};
+
+// ===================== UTILS =====================
+const $=id=>document.getElementById(id);
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+const AVC=['#4F6BD8','#C0406E','#2F9468','#8A5CC4','#C9772A','#2A86A8','#A9563F','#3F7FC4','#8E3B55','#2F8F80','#6C5CE7','#B8860B'];
+function avc(n){let h=0;for(const c of String(n))h=(h*31+c.charCodeAt(0))>>>0;return AVC[h%AVC.length];}
+function ini(n){return String(n||'?').trim().slice(0,2).toUpperCase();}
+function fmt(ms){const s=Math.max(0,Math.ceil(ms/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+function rand(a){return a[Math.floor(Math.random()*a.length)];}
+function shuffle(a){const r=a.slice();for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
+function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ';let s='';for(let i=0;i<4;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
+let toastT=null;
+function toast(msg,err){const t=$('toast');t.textContent=msg;t.className='on'+(err?' err':'');clearTimeout(toastT);toastT=setTimeout(()=>{t.className='';},3200);}
+function show(name){document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id==='s-'+name));}
+function busyBtn(id,on,txt){const b=$(id);if(!b)return;b.disabled=on;if(txt)b.textContent=txt;}
+
+// ===================== STATE =====================
+let db=null,offset=0,online=false;
+const ME=(()=>{let id=localStorage.getItem('wv_id');if(!id||!/^[a-z0-9]+$/i.test(id)){id='p'+Math.random().toString(36).slice(2,12);localStorage.setItem('wv_id',id);}return id;})();
+let NAME=localStorage.getItem('wv_name')||'';
+let CODE=null,S=null,roomRef=null,curKey='',advancing=false,presenceSet=false;
+let chatSubs=[];
+const MSGS={day:[],wolf:[],jail:[]};
+let dueKey='',dueAt=0;
+const now=()=>Date.now()+offset;
+const P=path=>'wv/'+CODE+'/'+path;
+const TS=()=>firebase.database.ServerValue.TIMESTAMP;
+
+// ===================== FIREBASE INIT =====================
+try{
+  firebase.initializeApp(FB_CFG);
+  db=firebase.database();
+  db.ref('.info/serverTimeOffset').on('value',s=>{offset=s.val()||0;});
+  db.ref('.info/connected').on('value',s=>{online=!!s.val();renderConn();if(online&&CODE)markOnline();});
+  db.ref('wvsr/'+ME).on('value',s=>{const v=s.val();MYSR=Object.assign({sr:SR_START,games:0,wins:0},v||{});renderHomeSR();if(S&&S.meta.status==='gameover')renderOver();});
+  db.ref('wvsr').orderByChild('sr').limitToLast(10).on('value',s=>{const rows=[];s.forEach(ch=>{const v=ch.val();if(v&&v.name&&v.games)rows.push(Object.assign({id:ch.key},v));});rows.sort((a,b)=>b.sr-a.sr);renderLeaderboard(rows);});
+}catch(e){
+  document.getElementById('app').innerHTML='<div class="banner deadb" style="margin-top:40px">No se pudo iniciar Firebase: '+esc(e.message)+'</div>';
+}
+function renderHomeSR(){
+  const el=$('h-sr');if(!el)return;const sr=Math.round(MYSR.sr);const r=rankOf(sr);const nx=nextRank(sr);
+  const pct=nx?Math.max(0,Math.min(100,(sr-r[0])/(nx[0]-r[0])*100)):100;
+  const wr=MYSR.games?Math.round(MYSR.wins/MYSR.games*100):0;
+  el.innerHTML='<div class="lbl">Tu rango</div><div class="srbig">'+r[2]+'</div><div class="srname" style="color:'+r[3]+'">'+r[1]+'</div><div class="srval">'+sr+' SR</div>'
+    +'<div class="bar"><i style="width:'+pct+'%;background:'+r[3]+'"></i></div><div class="muted">'+(nx?'Faltan '+(nx[0]-sr)+' SR para '+nx[2]+' '+nx[1]:'¡Rango máximo alcanzado!')+'</div>'
+    +'<div class="stats"><div><b>'+(MYSR.games||0)+'</b>Partidas</div><div><b>'+(MYSR.wins||0)+'</b>Victorias</div><div><b>'+wr+'%</b>Win rate</div></div>';
+}
+function renderLeaderboard(rows){
+  const el=$('h-lb');if(!el)return;
+  if(!rows.length){el.innerHTML='<p class="muted">Aún no hay partidas jugadas. ¡Sé el primero!</p>';return;}
+  el.innerHTML=rows.map((p,i)=>'<div class="lbrow'+(p.id===ME?' me':'')+'"><span class="lbpos">'+(i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1)+'</span><span style="flex:1;font-weight:700">'+esc(p.name)+(p.id===ME?' <small class="muted">(tú)</small>':'')+'</span><span class="muted">'+(p.wins||0)+'V/'+(p.games||0)+'P</span>'+srBadge(p.sr)+'</div>').join('');
+}
+function renderConn(){$('conn').textContent=online?'🟢 Conectado':'🔴 Sin conexión — reconectando...';$('offline').style.display=(!online&&CODE)?'block':'none';}
+
+// ===================== PLAYER HELPERS =====================
+function PL(){if(!S||!S.players)return[];return Object.entries(S.players).filter(([,p])=>p&&p.name).map(([id,p])=>Object.assign({id},p)).sort((a,b)=>(a.joinedAt||0)-(b.joinedAt||0)||(a.id<b.id?-1:1));}
+const isOn=p=>!!p&&p.online!==false;
+const isAlive=p=>!!p&&p.alive!==false;
+function meP(){return S&&S.players?S.players[ME]:null;}
+function myRole(){const m=meP();return m?m.role:null;}
+function amAlive(){return isAlive(meP());}
+function hostId(){if(!S)return null;const pl=PL();const h=S.meta.hostId;const hp=pl.find(p=>p.id===h);if(hp&&isOn(hp))return h;const on=pl.filter(isOn);return on.length?on[0].id:h;}
+function amHost(){return !!S&&hostId()===ME;}
+function jailerOf(id){const j=(S&&S.jailed)||{};for(const k in j){if(j[k]===id&&isAlive(S.players[k])&&S.players[k].role==='jailer')return k;}return null;}
+function myPrisoner(){const t=S&&S.jailed&&S.jailed[ME];return t&&isAlive(S.players[t])?t:null;}
+function jailUsed(id){return !!(S&&S.jailUsed&&S.jailUsed[id]);}
+function markOnline(){if(!CODE||!S||!S.players||!S.players[ME]||!S.players[ME].name)return;const r=db.ref(P('players/'+ME+'/online'));r.onDisconnect().set(false);r.set(true);}
+
+// ===================== ROLES =====================
+function maxWolves(n){return Math.max(1,Math.floor((Math.max(n,MIN_PLAYERS)-1)/2));}
+function buildRoles(n,cfg){const l=[];ROLE_ORDER.forEach(r=>{for(let i=0;i<(cfg[r]||0);i++)l.push(r);});if(!l.includes('wolf'))l.unshift('wolf');while(l.length<n)l.push('villager');return l.slice(0,n);}
+function validateCfg(cfg,n){const w=cfg.wolf||0;if(w<1)return{ok:false,msg:'Debe haber al menos 1 lobo'};const sp=ROLE_ORDER.reduce((s,r)=>s+(cfg[r]||0),0);if(sp>n)return{ok:false,msg:'Hay más roles especiales ('+sp+') que jugadores ('+n+'). Quita algunos.'};if(w>maxWolves(n))return{ok:false,msg:'Demasiados lobos para '+n+' jugadores (máx. '+maxWolves(n)+')'};return{ok:true};}
+function cfgCounts(cfg,n){const o={};let sp=0;ROLE_ORDER.forEach(r=>{const v=cfg[r]||0;if(v){o[r]=v;sp+=v;}});const v=Math.max(0,n-sp);if(v)o.villager=v;return o;}
+function gameCounts(){const c={};PL().forEach(p=>{if(p.role)c[p.role]=(c[p.role]||0)+1;});const o={};ROLE_ORDER.concat(['villager']).forEach(r=>{if(c[r])o[r]=c[r];});return o;}
+function roleChips(counts){return '<div class="chips">'+Object.entries(counts).filter(([,c])=>c>0).map(([r,c])=>{const d=R[r];return `<div class="chip" data-act="role" data-id="${r}" title="${esc(d.n+': '+d.d)}" style="background:${d.bg};border-color:${d.br}"><span style="font-size:24px">${d.i}</span><b style="color:${d.c}">${d.n}</b>${c>1?'<i>x'+c+'</i>':''}</div>`;}).join('')+'</div>';}
+function checkWin(players){
+  const a=Object.values(players||{}).filter(p=>p&&p.name&&p.alive!==false);
+  if(!a.length)return'none';
+  const w=a.filter(p=>p.role==='wolf').length;
+  const pi=a.filter(p=>p.role==='piro').length;
+  const others=a.length-w;
+  if(w===0&&pi===0)return'villagers';
+  if(w===0&&pi===a.length)return'piro';
+  if(w>0&&w>=others)return'wolves';
+  return null;
+}
+function isWinner(p,w){if(!p)return false;if(w==='wolves')return p.role==='wolf';if(w==='villagers')return !!R[p.role]&&R[p.role].t==='villagers';if(w==='bufon')return p.role==='bufon';if(w==='piro')return p.role==='piro';return false;}
+
+// ===================== ROOM CONNECTION =====================
+function listenRoom(code){
+  stopRoom();
+  CODE=code;curKey='';S=null;presenceSet=false;
+  localStorage.setItem('wv_s',JSON.stringify({code}));
+  roomRef=db.ref('wv/'+code);
+  roomRef.on('value',onRoom,e=>toast('Error de conexión: '+e.message,true));
+  ['day','wolf','jail'].forEach(k=>{
+    MSGS[k]=[];
+    const q=db.ref('wvchat/'+code+'/'+k).limitToLast(150);
+    const cb=q.on('child_added',s=>{const m=s.val();if(!m)return;MSGS[k].push(m);if(MSGS[k].length>300)MSGS[k].shift();renderChat(k);});
+    chatSubs.push([q,cb]);
+  });
+  renderConn();
+}
+function stopRoom(){if(roomRef)roomRef.off('value',onRoom);roomRef=null;chatSubs.forEach(([q,cb])=>q.off('child_added',cb));chatSubs=[];}
+function leaveLocal(){stopRoom();CODE=null;S=null;curKey='';presenceSet=false;localStorage.removeItem('wv_s');document.body.className='';$('hdr').classList.remove('on');$('offline').style.display='none';show('home');}
+function onRoom(snap){
+  const v=snap.val();
+  if(!v||!v.meta){toast('La sala ya no existe',true);leaveLocal();return;}
+  if(!v.players||!v.players[ME]||!v.players[ME].name){toast('Ya no estás en esta sala');leaveLocal();return;}
+  S=v;
+  if(!presenceSet&&online){presenceSet=true;markOnline();}
+  const m=S.meta;
+  if(m.status!=='busy'){const key=m.status+'|'+(m.round||0)+'|'+(m.gid||'');if(key!==curKey){curKey=key;enter(m.status);}}
+  render();
+}
+
+// ===================== PHASE ENGINE (any player can advance, only one wins) =====================
+setInterval(()=>{tickTimer();maybeAdvance();},500);
+function earlyDone(st){
+  const m=S.meta;if(m.phaseStart&&now()-m.phaseStart<T.MIN_PHASE)return false;
+  const pl=PL();const act=pl.filter(p=>isAlive(p)&&isOn(p));
+  if(st==='reveal')return pl.filter(isOn).every(p=>p.ack);
+  if(st==='night'){const na=S.na||{};const alivePl=pl.filter(isAlive);
+    return act.every(p=>{const r=p.role;
+      if(jailerOf(p.id))return true;
+      if(r==='jailer'){const x=S.jailed&&S.jailed[p.id];if(!x||!isAlive(S.players[x]))return true;return !!(na.jail&&na.jail[p.id]);}
+      if(r==='wolf')return !!(na.wolf&&na.wolf[p.id]);
+      if(r==='seer')return !!(na.seer&&na.seer[p.id]);
+      if(r==='doctor')return !!(na.doctor&&na.doctor[p.id]);
+      if(r==='piro'){const a=na.piro&&na.piro[p.id];if(!a)return false;if(a.a==='ignite')return true;const need=Math.min(2,alivePl.filter(x=>x.id!==p.id).length);return Object.keys(a.t||{}).length>=need;}
+      return true;});}
+  if(st==='day'){const v=S.votes||{},sk=S.skip||{};return act.length>0&&(act.every(p=>v[p.id])||act.every(p=>sk[p.id]));}
+  if(st==='hunter')return !!(m.hunter&&m.hunter.shot);
+  return false;
+}
+function maybeAdvance(){
+  if(!S||!CODE||!roomRef||advancing||!online)return;
+  const m=S.meta,st=m.status,step=m.step||0;
+  if(!['reveal','night','day','elim','hunter','busy'].includes(st))return;
+  const t=now();
+  let due=!!m.phaseEnd&&t>=m.phaseEnd;
+  if(!due&&st!=='busy')due=earlyDone(st);
+  if(!due){dueKey='';return;}
+  const k=st+'#'+step;if(dueKey!==k){dueKey=k;dueAt=t;}
+  if(!amHost()&&t-dueAt<1500)return; // host tries first, others back it up
+  claim(st,step);
+}
+function claim(st,step){
+  advancing=true;const t=now();const ref=roomRef;
+  ref.child('meta').transaction(m=>{
+    if(!m)return m;
+    if(m.status!==st||(m.step||0)!==step)return;
+    if(st!=='busy'){m.busyFrom=st;m.status='busy';}
+    m.step=step+1;m.phaseEnd=t+12000;return m;
+  },(err,ok,snap)=>{
+    if(err||!ok||!snap||!snap.val()){advancing=false;return;}
+    const mv=snap.val();
+    runAdvance(ref,mv.busyFrom,mv.step).catch(e=>{console.error(e);}).then(()=>{advancing=false;});
+  },false);
+}
+async function runAdvance(ref,from,step){
+  const D=(await ref.once('value')).val();
+  if(!D||!D.meta||D.meta.status!=='busy'||(D.meta.step||0)!==step)return;
+  const upd={'meta/busyFrom':null};
+  if(from==='reveal')nightStart(upd,1,D);
+  else if(from==='night')resolveNight(D,upd);
+  else if(from==='day')resolveDay(D,upd);
+  else if(from==='elim')afterElim(D,upd);
+  else if(from==='hunter')resolveHunter(D,upd);
+  else upd['meta/status']='lobby';
+  await ref.update(upd);
+}
+function clonePlayers(D){return JSON.parse(JSON.stringify(D.players||{}));}
+function killIn(Pm,upd,id,round,phase){Pm[id].alive=false;upd['players/'+id+'/alive']=false;upd['players/'+id+'/diedDay']=round;upd['players/'+id+'/diedPhase']=phase;}
+function nightStart(upd,round,D,Pm){
+  const t=now();const pm=Pm||(D&&D.players)||{};const jl={};
+  const al=id=>!!pm[id]&&!!pm[id].name&&pm[id].alive!==false;
+  Object.entries((D&&D.jailNext)||{}).forEach(([j,x])=>{if(al(j)&&pm[j].role==='jailer'&&al(x)&&x!==j)jl[j]=x;});
+  Object.assign(upd,{'meta/status':'night','meta/round':round,'meta/phaseStart':t,'meta/phaseEnd':t+T.NIGHT,'meta/hunter':null,'meta/elim':null,'na':null,'votes':null,'jailed':Object.keys(jl).length?jl:null,'jailNext':null,'skip':null});
+}
+function dayStart(upd,round,narr){const t=now();Object.assign(upd,{'meta/status':'day','meta/round':round,'meta/phaseStart':t,'meta/phaseEnd':t+T.DAY,'meta/narr':narr,'meta/hunter':null,'votes':null,'na':null,'jailed':null,'jailNext':null,'skip':null});}
+function finish(upd,win,narr){Object.assign(upd,{'meta/status':'gameover','meta/winner':win,'meta/phaseEnd':null,'meta/narr':narr||null,'meta/hunter':null,'meta/hunterPending':null});}
+
+function resolveNight(D,upd){
+  const round=D.meta.round||1;const Pm=clonePlayers(D);
+  const alive=id=>!!Pm[id]&&!!Pm[id].name&&Pm[id].alive!==false;
+  const role=id=>Pm[id]?Pm[id].role:null;
+  const na=D.na||{};
+  const jailedSet=new Set();const jailMap={};
+  Object.entries(D.jailed||{}).forEach(([j,x])=>{if(alive(j)&&role(j)==='jailer'&&alive(x)){jailedSet.add(x);jailMap[j]=x;}});
+  const tally={};
+  Object.entries(na.wolf||{}).forEach(([w,t])=>{if(alive(w)&&role(w)==='wolf'&&!jailedSet.has(w)&&alive(t)&&role(t)!=='wolf')tally[t]=(tally[t]||0)+1;});
+  const max=Math.max(0,...Object.values(tally));
+  const target=max>0?rand(Object.keys(tally).filter(k=>tally[k]===max)):null;
+  const saves=new Set(Object.entries(na.doctor||{}).filter(([d])=>alive(d)&&role(d)==='doctor'&&!jailedSet.has(d)).map(([,t])=>t));
+  const deaths=[];let saved=false,blocked=false;
+  if(target){if(jailedSet.has(target))blocked=true;else if(saves.has(target))saved=true;else deaths.push({id:target,by:'wolf'});}
+  // Carcelero: ejecución con su única bala
+  Object.entries(jailMap).forEach(([j,x])=>{if(na.jail&&na.jail[j]==='shoot'&&!(D.jailUsed&&D.jailUsed[j])){upd['jailUsed/'+j]=true;if(!deaths.find(d=>d.id===x))deaths.push({id:x,by:'jail'});}});
+  // Pyromaniac
+  const doused=Object.assign({},D.doused||{});let ignite=false;const newD=[];
+  Object.entries(na.piro||{}).forEach(([p,a])=>{if(!alive(p)||role(p)!=='piro'||!a||jailedSet.has(p))return;if(a.a==='ignite')ignite=true;else if(a.a==='douse')Object.keys(a.t||{}).forEach(id=>{if(alive(id)&&id!==p)newD.push(id);});});
+  let nd;
+  if(ignite){nd={};Object.keys(doused).forEach(id=>{if(!alive(id)||role(id)==='piro')return;if(jailedSet.has(id)){nd[id]=true;return;}if(!deaths.find(d=>d.id===id))deaths.push({id,by:'fire'});});}
+  else nd=doused;
+  newD.forEach(id=>{nd[id]=true;});
+  deaths.forEach(d=>{delete nd[d.id];});
+  upd['doused']=Object.keys(nd).length?nd:null;
+  deaths.forEach(d=>killIn(Pm,upd,d.id,round,'night'));
+  const parts=[];
+  deaths.filter(d=>d.by==='wolf').forEach(d=>parts.push(rand(NAR.wolf).replace('{n}',Pm[d.id].name)+' Era '+(R[role(d.id)]||{n:'?'}).n+'.'));
+  const fire=deaths.filter(d=>d.by==='fire');
+  if(fire.length)parts.push('🔥 '+fire.map(d=>Pm[d.id].name+' ('+(R[role(d.id)]||{n:'?'}).n+')').join(', ')+(fire.length>1?' murieron':' murió')+' entre las llamas.');
+  deaths.filter(d=>d.by==='jail').forEach(d=>parts.push('⛓️ '+Pm[d.id].name+' fue ejecutado en la cárcel. Era '+(R[role(d.id)]||{n:'?'}).n+'.'));
+  if(saved)parts.push(rand(NAR.saved));
+  if(blocked)parts.push('🔒 Los lobos salieron a cazar, pero su presa estaba fuera de su alcance.');
+  if(!deaths.length&&!saved&&!blocked)parts.push(rand(NAR.quiet));
+  const narr=parts.join(' ');
+  const win=checkWin(Pm);if(win){finish(upd,win,narr);return;}
+  const hd=deaths.find(d=>role(d.id)==='hunter');
+  if(hd){const t=now();Object.assign(upd,{'meta/status':'hunter','meta/hunter':{id:hd.id,next:'day'},'meta/narr':narr,'meta/phaseStart':t,'meta/phaseEnd':t+T.HUNTER,'na':null});return;}
+  dayStart(upd,round,narr);
+}
+function resolveDay(D,upd){
+  const round=D.meta.round||1;const Pm=clonePlayers(D);
+  const alive=id=>!!Pm[id]&&!!Pm[id].name&&Pm[id].alive!==false;
+  const tally={};
+  Object.entries(D.votes||{}).forEach(([v,t])=>{if(alive(v)&&alive(t)&&v!==t)tally[t]=(tally[t]||0)+1;});
+  const max=Math.max(0,...Object.values(tally));
+  const top=Object.keys(tally).filter(k=>tally[k]===max);
+  const t=now();
+  Object.assign(upd,{'meta/status':'elim','meta/phaseStart':t,'meta/phaseEnd':t+T.ELIM});
+  if(max===0||top.length!==1){upd['meta/elim']={none:true,tie:top.length>1&&max>0};return;}
+  const id=top[0];const p=Pm[id];
+  killIn(Pm,upd,id,round,'day');
+  upd['meta/elim']={id,name:p.name,role:p.role,votes:max};
+  if(p.role==='bufon'){finish(upd,'bufon','🃏 '+p.name+' era el Bufón... ¡y la aldea cayó en su trampa!');return;}
+  const win=checkWin(Pm);if(win){finish(upd,win,'⚖️ La aldea ahorcó a '+p.name+'. Era '+(R[p.role]||{n:'?'}).n+'.');return;}
+  if(p.role==='hunter')upd['meta/hunterPending']=id;
+}
+function afterElim(D,upd){
+  const round=D.meta.round||1;
+  if(D.meta.hunterPending){const t=now();Object.assign(upd,{'meta/status':'hunter','meta/hunter':{id:D.meta.hunterPending,next:'night'},'meta/hunterPending':null,'meta/phaseStart':t,'meta/phaseEnd':t+T.HUNTER});return;}
+  nightStart(upd,round+1,D);
+}
+function resolveHunter(D,upd){
+  const round=D.meta.round||1;const h=D.meta.hunter||{};const Pm=clonePlayers(D);
+  let extra='';
+  if(h.shot&&h.shot!=='none'&&Pm[h.shot]&&Pm[h.shot].alive!==false){
+    killIn(Pm,upd,h.shot,round,h.next==='day'?'night':'day');
+    extra='🗡️ '+(Pm[h.id]?Pm[h.id].name:'El vengador')+' se vengó y se llevó a '+Pm[h.shot].name+' a la tumba. Era '+(R[Pm[h.shot].role]||{n:'?'}).n+'.';
+  }else extra='🗡️ El vengador murió sin vengarse.';
+  const base=h.next==='day'?(D.meta.narr||''):'';
+  const narr=(base+' '+extra).trim();
+  const win=checkWin(Pm);if(win){finish(upd,win,narr);return;}
+  if(h.next==='day')dayStart(upd,round,narr);
+  else nightStart(upd,round+1,D,Pm);
+  upd['meta/hunterPending']=null;
+}
+
+// ===================== RENDER =====================
+const SCR={lobby:'lobby',reveal:'reveal',night:'night',day:'day',elim:'elim',hunter:'hunter',gameover:'over'};
+function enter(st){
+  show(SCR[st]||'lobby');
+  document.body.className=(st==='night'||st==='hunter')?'night':(st==='day'||st==='elim')?'day':'';
+  ['d-msgs','w-msgs','j-msgs'].forEach(id=>{const b=$(id);if(b)b.dataset.sig='';});
+  window.scrollTo(0,0);
+  if((st==='night'||st==='day')&&navigator.vibrate){try{navigator.vibrate(60);}catch(e){}}
+}
+function render(){
+  if(!S)return;
+  renderHeader();
+  const st=S.meta.status==='busy'?S.meta.busyFrom:S.meta.status;
+  try{
+    if(st==='lobby')renderLobby();
+    else if(st==='reveal')renderReveal();
+    else if(st==='night')renderNight();
+    else if(st==='day')renderDay();
+    else if(st==='elim')renderElim();
+    else if(st==='hunter')renderHunter();
+    else if(st==='gameover')renderOver();
+  }catch(e){console.error(e);}
+}
+function renderHeader(){
+  const m=S.meta;const st=m.status==='busy'?m.busyFrom:m.status;const r=m.round||1;
+  const L={lobby:'Sala '+CODE,reveal:'🎭 Repartiendo roles',night:'🌙 Noche '+r,day:'☀️ Día '+r,elim:'⚖️ Veredicto',hunter:'🗡️ El Vengador',gameover:'🏁 Fin de la partida'};
+  const C={lobby:'#5B8CFF',reveal:'#E0B43A',night:'#8A5CF0',day:'#F2B632',elim:'#E04848',hunter:'#FFB347',gameover:'#3CC47C'};
+  $('hdr').classList.add('on');$('hdr-l').textContent=L[st]||'';$('hdr-d').style.background=C[st]||'#888';
+  const pl=PL();$('hdr-s').textContent=st==='lobby'?pl.filter(isOn).length+' conectados':pl.filter(isAlive).length+' vivos de '+pl.length;
+  tickTimer();
+}
+function tickTimer(){
+  const el=$('hdr-t');if(!S){el.textContent='';return;}
+  const m=S.meta;const timed=['reveal','night','day','elim','hunter'].includes(m.status);
+  if(!timed||!m.phaseEnd){el.textContent=m.status==='busy'?'⏳':'';el.classList.remove('low');return;}
+  const rem=m.phaseEnd-now();el.textContent=fmt(rem);el.classList.toggle('low',rem<10000);
+}
+function pcard(p,o){
+  o=o||{};const dead=!isAlive(p);const cls=['pc'];
+  const tap=o.tap&&!dead;
+  if(tap)cls.push('tap');if(o.sel)cls.push(o.sel);if(dead)cls.push('dead');if(p.id===ME)cls.push('me');if(!dead&&!isOn(p))cls.push('off');
+  const rd=R[p.role]||null;
+  const av=dead?(rd?rd.i:'💀'):(o.icon||ini(p.name));
+  let sub=o.sub||'';
+  if(dead)sub=(rd?rd.n+' · ':'')+(p.diedPhase==='day'?'Día ':'Noche ')+(p.diedDay||'');
+  else if(!sub&&p.id===ME)sub='(tú)';
+  else if(!sub&&!isOn(p))sub='desconectado';
+  return `<div class="${cls.join(' ')}"${tap?` data-act="${o.tap}" data-id="${p.id}"`:''}>${o.badge?`<div class="bdg">${o.badge}</div>`:''}${o.tag?`<div class="tag">${o.tag}</div>`:''}<div class="av" style="background:${dead?'#3A1418':avc(p.name)}">${av}</div><div class="nm">${esc(p.name)}</div><div class="sb">${esc(sub)}</div></div>`;
+}
+function renderChat(kind){
+  if(!S)return;const box=$({day:'d-msgs',wolf:'w-msgs',jail:'j-msgs'}[kind]);if(!box)return;
+  const r=S.meta.round||0,g=S.meta.gid||'';
+  let list=MSGS[kind].filter(m=>m.g===g&&m.r===r);
+  let jk='';
+  if(kind==='jail'){jk=myPrisoner()?ME:(jailerOf(ME)||'-');list=list.filter(m=>m.j===jk);}
+  const sig=g+'|'+r+'|'+jk+'|'+list.length;if(box.dataset.sig===sig)return;box.dataset.sig=sig;
+  const empty={day:'Debatan: ¿quién es el lobo?',wolf:'Coordinen su ataque en secreto...',jail:'Nadie más puede leer esta conversación.'}[kind];
+  box.innerHTML=list.length?list.map(m=>{if(kind==='jail'){const isJ=m.s==='j';return `<div class="msg"><b style="color:${isJ?'#B8CCE8':avc(m.n)}">${isJ?'⛓️ Carcelero':esc(m.n)}</b>${esc(m.t)}</div>`;}return `<div class="msg"><b style="color:${avc(m.n)}">${esc(m.n)}</b>${esc(m.t)}</div>`;}).join(''):`<div class="msg sys">${empty}</div>`;
+  box.scrollTop=box.scrollHeight;
+}
+
+function renderLobby(){
+  $('l-code').textContent=CODE;
+  const pl=PL();const h=hostId();
+  $('l-players').innerHTML=pl.map(p=>`<div class="prow${isOn(p)?'':' off'}"><div class="av sm" style="background:${avc(p.name)}">${ini(p.name)}</div><span style="flex:1">${esc(p.name)}${p.id===ME?' <small>(tú)</small>':''}</span>${srBadge(p.sr)}${p.ver!==VERSION?'<small style="color:var(--red)">⚠️ '+(p.ver?'v'+esc(p.ver):'versión antigua')+'</small>':''}${p.id===h?'<span class="crown">👑</span>':''}${isOn(p)?'':'<small>desconectado</small>'}</div>`).join('');
+  const n=pl.filter(isOn).length;const cfg=S.meta.cfg||{};
+  $('l-roles').innerHTML=roleChips(cfgCounts(cfg,Math.max(n,1)));
+  const host=amHost();
+  $('l-cfg').style.display=host?'':'none';
+  if(host){
+    const sp=ROLE_ORDER.reduce((s,r)=>s+(cfg[r]||0),0);
+    $('l-cfg-rows').innerHTML=ROLE_ORDER.map(r=>`<div class="stp"><span class="stp-n" data-act="role" data-id="${r}">${R[r].i} ${R[r].n}</span><div class="stp-b"><button data-act="cfg" data-id="${r}:-1">−</button><span class="stp-v">${cfg[r]||0}</span><button data-act="cfg" data-id="${r}:1">+</button></div></div>`).join('')+`<div class="stp"><span class="stp-n" data-act="role" data-id="villager">🏡 Aldeanos</span><span class="stp-v" style="margin-right:48px">${Math.max(0,n-sp)}</span></div>`;
+  }
+  const v=validateCfg(cfg,n);
+  $('l-start').style.display=host?'':'none';
+  $('l-start').disabled=!(n>=MIN_PLAYERS&&v.ok);
+  $('l-note').textContent=n<MIN_PLAYERS?'Faltan '+(MIN_PLAYERS-n)+' jugador(es) para empezar (mínimo '+MIN_PLAYERS+')':!v.ok?v.msg:host?'¡Todo listo! Inicia cuando quieras.':'Esperando a que el host inicie...';
+  if(pl.some(p=>isOn(p)&&p.ver!==VERSION))$('l-note').textContent='⚠️ Hay jugadores con otra versión. Pídanles recargar la página (versión actual: v'+VERSION+').';
+}
+function renderReveal(){
+  const r=myRole();const d=R[r];
+  if(!d){$('r-card').innerHTML='<p class="note">Asignando roles...</p>';}
+  else{
+    let extra='';
+    if(r==='wolf'){const pack=PL().filter(p=>p.role==='wolf'&&p.id!==ME);extra=pack.length?'<p style="margin-top:12px;font-weight:800;color:#FF9A9A">🐺 Tu manada: '+pack.map(p=>esc(p.name)).join(', ')+'</p>':'<p style="margin-top:12px;font-weight:800;color:#FF9A9A">🐺 Eres el único lobo</p>';}
+    $('r-card').innerHTML=`<div class="rolecard" style="background:${d.bg};border-color:${d.br}"><div class="big">${d.i}</div><h2 style="color:${d.c}">${d.n}</h2><p>${d.d}</p>${extra}</div>`+'<div class="card"><div class="lbl">Roles en esta partida</div>'+roleChips(gameCounts())+'</div>';
+  }
+  const pl=PL();const ready=pl.filter(p=>p.ack).length;const me=meP();
+  $('r-ack').style.display=me&&me.ack?'none':'';
+  $('r-wait').textContent=ready+'/'+pl.length+' listos · la noche empieza sola';
+}
+function renderNight(){
+  const r=myRole(),alive=amAlive(),pl=PL(),na=S.na||{},round=S.meta.round||1;
+  let h='';
+  if(!alive)h+='<div class="banner deadb">💀 Estás eliminado. Observa en silencio.</div>';
+  const jb=alive?jailerOf(ME):null;
+  if(jb){
+    h+='<div class="card center" style="border-color:#43597A;background:#131B28;color:#E6EEF8"><div style="font-size:54px">⛓️</div><h3 style="margin:6px 0 8px">Estás en la cárcel</h3><p style="font-size:14px;line-height:1.6;opacity:.85">Esta noche no puedes usar tu habilidad, pero nadie puede atacarte... excepto el carcelero, que tiene una bala. Habla con él abajo: no sabes quién es.</p></div>';
+  }else if(r==='wolf'){
+    const wolves=pl.filter(p=>p.role==='wolf');const votes=na.wolf||{};const cnt={};
+    Object.entries(votes).forEach(([w,t])=>{if(isAlive(S.players[w]))cnt[t]=(cnt[t]||0)+1;});
+    const mine=votes[ME];
+    h+=`<div class="card wolfbox"><div class="lbl" style="color:#FF9A9A">🐺 Tu manada</div>${wolves.map(w=>`<span class="wchip${isAlive(w)?'':' dead'}">${esc(w.name)}${w.id===ME?' (tú)':''}</span>`).join('')}</div>`;
+    h+=`<div class="card"><div class="rowb"><div class="lbl">¿A quién atacan?</div><span class="muted">${mine&&S.players[mine]?'Tu voto: '+esc(S.players[mine].name):alive?'Toca a tu víctima':''}</span></div><div class="grid">${pl.map(p=>{const isW=p.role==='wolf'&&isAlive(p);return pcard(p,{tap:alive&&!isW?'wolf':null,sel:mine===p.id?'sel':'',badge:cnt[p.id]||'',tag:isW?'🐺':'',sub:isW&&p.id!==ME?'Lobo':''});}).join('')}</div>${alive?'<p class="hint">Si hay empate entre lobos, se elige al azar entre los más votados. Puedes cambiar tu voto.</p>':''}</div>`;
+  }else if(r==='seer'){
+    const done=na.seer&&na.seer[ME];const res=(S.seer&&S.seer[ME])||{};
+    const known={};Object.values(res).forEach(x=>{if(x&&x.id)known[x.id]=x.wolf;});
+    if(alive&&!done){
+      h+=`<div class="card"><div class="lbl">🔮 Investiga a un jugador</div><div class="grid">${pl.map(p=>pcard(p,{tap:p.id!==ME?'seer':null,tag:known[p.id]===true?'🐺':known[p.id]===false?'✓':'',sub:p.id!==ME&&isAlive(p)?'Investigar':''})).join('')}</div><p class="hint">Solo puedes investigar a una persona por noche.</p></div>`;
+    }else if(done&&res[round]){
+      const x=res[round];
+      h+=`<div class="res ${x.wolf?'w':'v'}"><div class="lbl">Resultado de esta noche</div><div style="font-size:18px;font-weight:900">${esc(x.name)}</div><div class="big">${x.wolf?'🐺':'✓'}</div><div style="font-weight:900;color:${x.wolf?'var(--red)':'var(--green)'}">${x.wolf?'¡ES UN LOBO!':'No es lobo'}</div></div><p class="note">Guarda bien este secreto. Espera el amanecer...</p>`;
+    }
+    const hist=Object.entries(res).sort((a,b)=>Number(a[0])-Number(b[0]));
+    if(hist.length)h+=`<div class="card"><div class="lbl">Tus investigaciones</div><div class="hist">${hist.map(([n,x])=>`Noche ${n}: <b>${esc(x.name)}</b> — ${x.wolf?'🐺 Lobo':'✓ No es lobo'}`).join('<br>')}</div></div>`;
+  }else if(r==='doctor'){
+    const cur=na.doctor&&na.doctor[ME];
+    if(alive)h+=`<div class="card"><div class="rowb"><div class="lbl">💉 ¿A quién proteges?</div><span class="muted">${cur&&S.players[cur]?'Protegiendo a '+esc(S.players[cur].name):'Nadie aún'}</span></div><div class="grid">${pl.map(p=>pcard(p,{tap:'doc',sel:cur===p.id?'selg':'',sub:isAlive(p)?(p.id===ME?'Protegerte':'Proteger'):''})).join('')}</div><p class="hint">Puedes cambiar tu elección hasta que termine la noche.</p></div>`;
+  }else if(r==='piro'){
+    const cur=(na.piro&&na.piro[ME])||null;const doused=S.doused||{};
+    const dAlive=Object.keys(doused).filter(id=>isAlive(S.players[id]));
+    const sel=cur&&cur.a==='douse'?(cur.t||{}):{};const selN=Object.keys(sel).length;
+    if(alive){
+      h+=`<div class="card"><div class="lbl">🔥 Elige tu acción</div><div class="pbtns"><button class="btn b-gh ${cur&&cur.a==='douse'?'on':''}" data-act="pmode" data-id="douse">💧 Empapar (${selN}/2)</button><button class="btn b-red ${cur&&cur.a==='ignite'?'on':''}" data-act="ignite" ${dAlive.length?'':'disabled'}>🔥 Incendiar (${dAlive.length})</button></div><p class="hint" style="margin:0">${cur&&cur.a==='ignite'?'🔥 Esta noche incendiarás a: '+dAlive.map(id=>esc(S.players[id].name)).join(', '):dAlive.length?'Empapados: '+dAlive.map(id=>esc(S.players[id].name)).join(', '):'Aún no has empapado a nadie.'}</p></div>`;
+      h+=`<div class="card"><div class="lbl">💧 Toca hasta 2 jugadores para empapar</div><div class="grid">${pl.map(p=>pcard(p,{tap:p.id!==ME?'douse':null,sel:sel[p.id]?'selb':'',tag:doused[p.id]&&isAlive(p)?'💧':'',sub:doused[p.id]&&isAlive(p)?'empapado':''})).join('')}</div></div>`;
+    }
+  }else if(r==='jailer'){
+    const jp=myPrisoner();const used=jailUsed(ME);const act=na.jail&&na.jail[ME];
+    if(alive&&jp){
+      const pp=Object.assign({id:jp},S.players[jp]);
+      h+=`<div class="card"><div class="lbl">⛓️ Tu prisionero esta noche</div><div style="max-width:130px;margin:0 auto 12px">${pcard(pp,{sel:act==='shoot'?'sel':'selb',sub:act==='shoot'?'🔫 Será ejecutado':'Encarcelado'})}</div><div class="pbtns"><button class="btn b-red ${act==='shoot'?'on':''}" data-act="jshoot" ${used?'disabled':''}>🔫 Ejecutar${used?' (sin bala)':''}</button><button class="btn b-gh ${act==='spare'?'on':''}" data-act="jspare">🕊️ Perdonar</button></div><p class="hint" style="margin:0">${used?'Ya usaste tu única bala.':'Tienes 1 bala para toda la partida.'} Puedes cambiar tu decisión hasta que termine la noche. Tu prisionero no sabe quién eres.</p></div>`;
+    }else if(alive){
+      h+=`<div class="moon"><div class="big">⛓️</div><p>No encarcelaste a nadie esta noche.<br>Durante el día elige a quién encerrar.</p><p class="muted" style="margin-top:14px">${used?'Ya usaste tu bala.':'🔫 Aún tienes tu bala.'}</p></div>`;
+    }
+  }else if(alive){
+    const txt={villager:'La noche ha caído sobre la aldea.<br>Descansa... y reza por despertar mañana.',hunter:'Duerme con tu daga cerca.<br>Si mueres, podrás vengarte y llevarte a alguien contigo.',bufon:'Eres el Bufón 🃏<br>Mañana haz que la aldea sospeche de ti.'}[r]||'La noche ha caído.';
+    h+=`<div class="moon"><div class="big">${r==='bufon'?'🃏':r==='hunter'?'🗡️':'🌙'}</div><p>${txt}</p><p class="muted" style="margin-top:18px">El amanecer llegará solo cuando todos terminen.</p></div>`;
+  }
+  $('n-panel').innerHTML=h;
+  const isWolf=r==='wolf'&&!jb;
+  $('n-wolf').style.display=isWolf?'':'none';
+  const jp2=myPrisoner();const inJail=alive&&(!!jb||(r==='jailer'&&!!jp2));
+  $('n-jail').style.display=inJail?'':'none';
+  if(inJail){$('j-title').textContent=jb?'⛓️ Chat con el Carcelero (anónimo)':'⛓️ Interrogatorio con '+S.players[jp2].name;renderChat('jail');}
+  if(isWolf){$('w-in').disabled=!alive;$('w-in').placeholder=alive?'Solo los lobos lo ven...':'Estás eliminado';renderChat('wolf');}
+}
+function renderDay(){
+  $('d-narr').textContent=S.meta.narr||'☀️ Amanece en la aldea...';
+  $('d-roles').innerHTML=roleChips(gameCounts());
+  const pl=PL(),votes=S.votes||{},alive=amAlive(),mine=votes[ME];
+  const cnt={};Object.entries(votes).forEach(([v,t])=>{if(isAlive(S.players[v]))cnt[t]=(cnt[t]||0)+1;});
+  $('d-grid').innerHTML=pl.map(p=>pcard(p,{tap:alive&&p.id!==ME?'vote':null,sel:mine===p.id?'sel':'',badge:cnt[p.id]||''})).join('');
+  const al=pl.filter(isAlive);const voted=al.filter(p=>votes[p.id]).length;
+  $('d-vs').textContent=voted+'/'+al.length+' votaron';
+  $('d-hint').textContent=!alive?'💀 Estás eliminado: no puedes votar ni hablar.':mine&&S.players[mine]?'Votaste por '+S.players[mine].name+'. Toca a otro para cambiar, o al mismo para quitar tu voto.':'Toca a un jugador para votar. Puedes cambiar tu voto mientras corre el tiempo.';
+  const vl=al.filter(p=>votes[p.id]&&S.players[votes[p.id]]).map(p=>esc(p.name)+' → '+esc(S.players[votes[p.id]].name));
+  $('d-vlist').innerHTML=vl.join(' · ');
+  const sk=S.skip||{};const skAct=al.filter(isOn);const skN=skAct.filter(p=>sk[p.id]).length;const mySk=!!sk[ME];const sb=$('d-skip');
+  sb.style.display=alive?'':'none';sb.className='btn '+(mySk?'b-pri':'b-gh');
+  sb.textContent=(mySk?'✓ Quieres saltar':'⏭️ Saltar tiempo')+'  ('+skN+'/'+skAct.length+')';
+  $('d-skiph').textContent=skN?(skN>=skAct.length?'¡Todos quieren saltar! Terminando el día...':'Se salta el tiempo solo cuando todos toquen Saltar. Se cuentan los votos que haya.'):'';
+  const dj=$('d-jail');
+  if(myRole()==='jailer'&&alive){
+    const cur=S.jailNext&&S.jailNext[ME];
+    dj.style.display='';
+    dj.innerHTML=`<div class="rowb"><div class="lbl">⛓️ Encarcelar esta noche (solo tú lo ves)</div><span class="muted">${jailUsed(ME)?'Sin bala':'🔫 1 bala'}</span></div><div class="grid">${pl.map(p=>pcard(p,{tap:p.id!==ME?'jailpick':null,sel:cur===p.id?'selb':'',tag:cur===p.id?'⛓️':''})).join('')}</div><p class="hint">${cur&&S.players[cur]?'Esta noche encerrarás a <b>'+esc(S.players[cur].name)+'</b>. Toca de nuevo para cancelar.':'Toca a un jugador para encerrarlo esta noche. Nadie más lo sabrá.'}</p>`;
+  }else{dj.style.display='none';dj.innerHTML='';}
+  $('d-in').disabled=!alive;$('d-in').placeholder=alive?'Escribe tu mensaje...':'Los eliminados no pueden hablar';
+  renderChat('day');
+}
+function renderElim(){
+  const e=S.meta.elim||{};
+  if(e.none){$('e-body').innerHTML=`<div class="big">🤷</div><h2>${e.tie?'¡Empate!':'Nadie votó'}</h2><p class="muted">Nadie fue eliminado hoy.</p><p class="muted" style="margin-top:20px">La noche se acerca...</p>`;return;}
+  const d=R[e.role]||{i:'💀',n:'?',c:'var(--t)'};
+  $('e-body').innerHTML=`<div class="big">${d.i}</div><h2>${esc(e.name||'')}</h2><p style="font-size:16px;font-weight:800;color:${d.c}">Era ${d.n}</p><p class="muted" style="margin-top:6px">Eliminado con ${e.votes||0} voto(s)</p>${e.role==='hunter'?'<p style="margin-top:14px;font-weight:800;color:#FFB347">🗡️ ¡El vengador prepara su venganza!</p>':'<p class="muted" style="margin-top:20px">La noche se acerca...</p>'}`;
+}
+function renderHunter(){
+  const h=S.meta.hunter||{};const hp=S.players[h.id];const pl=PL();
+  let html=`<div class="moon" style="padding:20px 10px"><div class="big">🗡️</div><h2 style="color:#FFB347">${esc(hp?hp.name:'El vengador')} ha caído</h2>`;
+  if(h.id===ME&&!h.shot){
+    html+='<p>Elige a quién llevarte contigo.</p></div>';
+    html+=`<div class="card"><div class="grid">${pl.map(p=>pcard(p,{tap:p.id!==ME?'shoot':null,sub:isAlive(p)&&p.id!==ME?'🗡️ Vengarse':''})).join('')}</div></div><button class="btn b-gh" data-act="noshoot">No vengarse</button>`;
+  }else if(h.id===ME){html+='<p>Ya elegiste tu venganza.</p></div>';}
+  else html+='<p>El vengador está eligiendo su venganza...</p></div>';
+  $('h-body').innerHTML=html;
+}
+function applySR(){
+  if(!S||S.meta.status!=='gameover')return;const gid=S.meta.gid;const me=meP();
+  if(!gid||!me||!me.role||srDone[gid])return;srDone[gid]=true;
+  const d=srDelta(me,S.meta.winner);const code=CODE;
+  db.ref('wvsr/'+ME).transaction(cur=>{
+    cur=cur||{sr:SR_START,games:0,wins:0};
+    if(cur.last===gid)return;
+    cur.sr=Math.max(0,(cur.sr==null?SR_START:cur.sr)+d);cur.games=(cur.games||0)+1;if(d>0)cur.wins=(cur.wins||0)+1;
+    cur.last=gid;cur.name=me.name;return cur;
+  },(err,ok,snap)=>{if(!err&&ok&&snap&&snap.val()&&code)db.ref('wv/'+code+'/players/'+ME+'/sr').set(Math.round(snap.val().sr));});
+}
+function renderOver(){
+  applySR();
+  const w=S.meta.winner||'none';const info=WIN[w]||WIN.none;
+  $('o-head').innerHTML=`<div class="big">${info.i}</div><h2 style="color:${info.c}">${info.t}</h2><p class="muted">${info.s}</p>`;
+  const narr=S.meta.narr;$('o-narr').style.display=narr?'':'none';$('o-narr').textContent=narr||'';
+  const me=meP();const won=isWinner(me,w);
+  $('o-me').textContent=won?'🏆 ¡Ganaste esta partida!':'😔 Esta vez no ganaste';
+  $('o-me').style.background=won?'rgba(60,196,124,.15)':'rgba(224,72,72,.1)';$('o-me').style.color=won?'var(--green)':'var(--red)';
+  const md=srDelta(me,w);const cur=Math.round(MYSR.sr);const r=rankOf(cur);
+  $('o-sr').innerHTML='<div class="lbl">Rating</div><div class="srgain" style="color:'+(md>0?'var(--green)':md<0?'var(--red)':'var(--t3)')+'">'+(md>0?'+':'')+md+' SR</div><div style="margin-top:8px">'+srBadge(cur)+' <b style="color:'+r[3]+'">'+r[1]+'</b></div>';
+  $('o-list').innerHTML=PL().map(p=>{const d=R[p.role]||{i:'?',n:'?',bg:'#222',c:'#fff',br:'#444'};const win=isWinner(p,w);return `<div class="prow${win?' win':''}"><div class="av sm" style="background:${avc(p.name)}">${ini(p.name)}</div><span style="flex:1" class="${isAlive(p)?'':'strike'}">${esc(p.name)}${p.id===ME?' <small>(tú)</small>':''}</span><span class="rbadge" style="background:${d.bg};color:${d.c};border-color:${d.br}">${d.i} ${d.n}</span>${(()=>{const x=srDelta(p,w);return '<span class="dsr '+(x>0?'up':x<0?'dn':'')+'">'+(x>0?'+':'')+x+'</span>';})()}</div>`;}).join('');
+  const host=amHost();$('o-again').style.display=host?'':'none';$('o-wait').style.display=host?'none':'';
+}
+
+// ===================== ACTIONS =====================
+function readName(){const n=$('h-name').value.trim().replace(/\s+/g,' ').slice(0,14);if(!n){toast('Escribe tu nombre primero',true);$('h-name').focus();return null;}NAME=n;localStorage.setItem('wv_name',n);return n;}
+async function create(){
+  if(!db)return;if(!online)return toast('Sin conexión a internet',true);
+  const name=readName();if(!name)return;
+  busyBtn('btn-create',true,'Creando...');
+  try{
+    let code=null;for(let i=0;i<8;i++){const c=genCode();const ex=await db.ref('wv/'+c+'/meta/status').once('value');if(!ex.exists()){code=c;break;}}
+    if(!code)throw new Error('Intenta de nuevo');
+    await db.ref('wv/'+code).set({meta:{status:'lobby',hostId:ME,step:0,round:0,cfg:{wolf:1,seer:1,doctor:1,jailer:0,hunter:0,bufon:0,piro:0},createdAt:TS()},players:{[ME]:{name,joinedAt:TS(),online:true,alive:true,sr:Math.round(MYSR.sr),ver:VERSION}}});
+    listenRoom(code);
+  }catch(e){toast('No se pudo crear la sala: '+e.message,true);}
+  busyBtn('btn-create',false,'✦ Crear partida');
+}
+async function join(){
+  if(!db)return;if(!online)return toast('Sin conexión a internet',true);
+  const name=readName();if(!name)return;
+  const code=$('h-code').value.trim().toUpperCase();
+  if(!/^[A-Z]{4}$/.test(code)){toast('El código tiene 4 letras',true);return;}
+  busyBtn('btn-join',true,'Buscando sala...');
+  try{
+    const d=(await db.ref('wv/'+code).once('value')).val();
+    if(!d||!d.meta)throw new Error('Sala no encontrada. Revisa el código.');
+    const mine=d.players&&d.players[ME]&&d.players[ME].name;
+    if(!mine){
+      if(d.meta.status!=='lobby')throw new Error('La partida ya empezó');
+      const n=Object.values(d.players||{}).filter(p=>p&&p.name).length;
+      if(n>=MAX_PLAYERS)throw new Error('La sala está llena');
+      await db.ref('wv/'+code+'/players/'+ME).set({name,joinedAt:TS(),online:true,alive:true,sr:Math.round(MYSR.sr),ver:VERSION});
+    }else{await db.ref('wv/'+code+'/players/'+ME).update({online:true,sr:Math.round(MYSR.sr),ver:VERSION});}
+    listenRoom(code);
+  }catch(e){toast(e.message,true);}
+  busyBtn('btn-join',false,'Unirse →');
+}
+async function leave(){
+  if(!CODE||!S){leaveLocal();return;}
+  const code=CODE,st=S.meta.status;const others=PL().filter(p=>p.id!==ME&&isOn(p));
+  try{await db.ref('wv/'+code+'/players/'+ME+'/online').onDisconnect().cancel();}catch(e){}
+  leaveLocal();
+  try{
+    if(!others.length){await db.ref('wv/'+code).remove();await db.ref('wvchat/'+code).remove();}
+    else if(st==='lobby')await db.ref('wv/'+code+'/players/'+ME).remove();
+    else await db.ref('wv/'+code+'/players/'+ME+'/online').set(false);
+  }catch(e){}
+}
+async function checkRejoin(){
+  const s=JSON.parse(localStorage.getItem('wv_s')||'null');if(!s||!s.code||!db)return;
+  try{const d=(await db.ref('wv/'+s.code).once('value')).val();
+    if(!d||!d.meta||!d.players||!d.players[ME]||!d.players[ME].name){localStorage.removeItem('wv_s');return;}
+    $('rj-code').textContent=s.code;$('rj').style.display='';
+  }catch(e){}
+}
+async function rejoin(){const s=JSON.parse(localStorage.getItem('wv_s')||'null');$('rj').style.display='none';if(!s||!s.code)return;try{await db.ref('wv/'+s.code+'/players/'+ME).update({online:true,ver:VERSION});}catch(e){}listenRoom(s.code);}
+function dismiss(){localStorage.removeItem('wv_s');$('rj').style.display='none';}
+function cfg(arg){
+  if(!amHost()||S.meta.status!=='lobby')return;
+  const [r,d]=String(arg).split(':');if(!R[r])return;
+  const n=PL().filter(isOn).length;const c=S.meta.cfg||{};
+  let v=(c[r]||0)+Number(d);
+  const cap=r==='wolf'?maxWolves(n):Math.max(1,Math.max(n,MIN_PLAYERS)-1);
+  v=Math.max(r==='wolf'?1:0,Math.min(v,cap));
+  db.ref(P('meta/cfg/'+r)).set(v);
+}
+async function start(){
+  if(!amHost()||S.meta.status!=='lobby')return;
+  const pl=PL().filter(isOn);if(pl.length<MIN_PLAYERS)return toast('Mínimo '+MIN_PLAYERS+' jugadores',true);
+  const c=S.meta.cfg||{};const v=validateCfg(c,pl.length);if(!v.ok)return toast(v.msg,true);
+  busyBtn('l-start',true,'Iniciando...');
+  try{
+    const roles=shuffle(buildRoles(pl.length,c));const upd={};
+    PL().filter(p=>!isOn(p)).forEach(p=>{upd['players/'+p.id]=null;});
+    pl.forEach((p,i)=>{upd['players/'+p.id+'/role']=roles[i];upd['players/'+p.id+'/alive']=true;upd['players/'+p.id+'/ack']=false;upd['players/'+p.id+'/diedDay']=null;upd['players/'+p.id+'/diedPhase']=null;});
+    const t=now();
+    Object.assign(upd,{'meta/status':'reveal','meta/round':0,'meta/phaseStart':t,'meta/phaseEnd':t+T.REVEAL,'meta/winner':null,'meta/narr':null,'meta/elim':null,'meta/hunter':null,'meta/hunterPending':null,'meta/busyFrom':null,'meta/gid':Math.random().toString(36).slice(2,8),'na':null,'votes':null,'seer':null,'doused':null,'jailed':null,'jailNext':null,'jailUsed':null,'skip':null});
+    await roomRef.update(upd);
+    db.ref('wvchat/'+CODE).remove();
+  }catch(e){toast('Error al iniciar: '+e.message,true);}
+  busyBtn('l-start',false,'▶ Iniciar partida');
+}
+async function again(){
+  if(!amHost()||S.meta.status!=='gameover')return;
+  const upd={};
+  PL().forEach(p=>{if(!isOn(p))upd['players/'+p.id]=null;else{upd['players/'+p.id+'/role']=null;upd['players/'+p.id+'/alive']=true;upd['players/'+p.id+'/ack']=null;upd['players/'+p.id+'/diedDay']=null;upd['players/'+p.id+'/diedPhase']=null;}});
+  Object.assign(upd,{'meta/status':'lobby','meta/hostId':ME,'meta/round':0,'meta/phaseEnd':null,'meta/winner':null,'meta/narr':null,'meta/elim':null,'meta/hunter':null,'meta/hunterPending':null,'na':null,'votes':null,'seer':null,'doused':null,'jailed':null,'jailNext':null,'jailUsed':null,'skip':null});
+  try{await roomRef.update(upd);}catch(e){toast('Error: '+e.message,true);}
+}
+function ack(){if(S&&S.meta.status==='reveal')db.ref(P('players/'+ME+'/ack')).set(true);}
+function canAct(role){return !!S&&S.meta.status==='night'&&myRole()===role&&amAlive()&&!jailerOf(ME);}
+function wolf(id){if(!canAct('wolf'))return;const t=S.players[id];if(!isAlive(t)||t.role==='wolf')return;const cur=S.na&&S.na.wolf&&S.na.wolf[ME];db.ref(P('na/wolf/'+ME)).set(cur===id?null:id);}
+function seer(id){if(!canAct('seer')||id===ME)return;if(S.na&&S.na.seer&&S.na.seer[ME])return;const t=S.players[id];if(!isAlive(t))return;const r=S.meta.round||1;const upd={};upd['na/seer/'+ME]=id;upd['seer/'+ME+'/'+r]={id,name:t.name,wolf:t.role==='wolf'};roomRef.update(upd);}
+function doc(id){if(!canAct('doctor'))return;if(!isAlive(S.players[id]))return;db.ref(P('na/doctor/'+ME)).set(id);}
+function douse(id){
+  if(!canAct('piro')||id===ME||!isAlive(S.players[id]))return;
+  const cur=(S.na&&S.na.piro&&S.na.piro[ME])||null;
+  const sel=Object.assign({},cur&&cur.a==='douse'?(cur.t||{}):{});
+  if(sel[id])delete sel[id];else{if(Object.keys(sel).length>=2){toast('Máximo 2 jugadores por noche');return;}sel[id]=true;}
+  db.ref(P('na/piro/'+ME)).set(Object.keys(sel).length?{a:'douse',t:sel}:null);
+}
+function pmode(){if(!canAct('piro'))return;const cur=S.na&&S.na.piro&&S.na.piro[ME];if(cur&&cur.a==='ignite')db.ref(P('na/piro/'+ME)).set(null);}
+function ignite(){if(!canAct('piro'))return;const cur=S.na&&S.na.piro&&S.na.piro[ME];db.ref(P('na/piro/'+ME)).set(cur&&cur.a==='ignite'?null:{a:'ignite'});}
+function jailpick(id){if(!S||S.meta.status!=='day'||myRole()!=='jailer'||!amAlive()||id===ME||!isAlive(S.players[id]))return;const cur=S.jailNext&&S.jailNext[ME];db.ref(P('jailNext/'+ME)).set(cur===id?null:id);}
+function jshoot(){if(!S||S.meta.status!=='night'||myRole()!=='jailer'||!amAlive()||!myPrisoner()||jailUsed(ME))return;const cur=S.na&&S.na.jail&&S.na.jail[ME];db.ref(P('na/jail/'+ME)).set(cur==='shoot'?'spare':'shoot');}
+function jspare(){if(!S||S.meta.status!=='night'||myRole()!=='jailer'||!amAlive()||!myPrisoner())return;db.ref(P('na/jail/'+ME)).set('spare');}
+function skip(){if(!S||S.meta.status!=='day'||!amAlive())return;const cur=S.skip&&S.skip[ME];db.ref(P('skip/'+ME)).set(cur?null:true);}
+function vote(id){if(!S||S.meta.status!=='day'||!amAlive()||id===ME)return;if(!isAlive(S.players[id]))return;const cur=S.votes&&S.votes[ME];db.ref(P('votes/'+ME)).set(cur===id?null:id);}
+function shoot(id){const h=S&&S.meta.hunter;if(!h||S.meta.status!=='hunter'||h.id!==ME||h.shot)return;if(id===ME||!isAlive(S.players[id]))return;db.ref(P('meta/hunter/shot')).set(id);}
+function noshoot(){const h=S&&S.meta.hunter;if(!h||S.meta.status!=='hunter'||h.id!==ME||h.shot)return;db.ref(P('meta/hunter/shot')).set('none');}
+function sendChat(kind){
+  if(!S||!CODE)return;const inp=$({day:'d-in',wolf:'w-in',jail:'j-in'}[kind]);const t=inp.value.trim().slice(0,160);if(!t)return;
+  if(!amAlive())return toast('Los eliminados no pueden hablar');
+  if(kind==='jail'){
+    if(S.meta.status!=='night')return;
+    let j=null,s=null;if(myPrisoner()){j=ME;s='j';}else{const x=jailerOf(ME);if(x){j=x;s='p';}}
+    if(!j)return;inp.value='';
+    db.ref('wvchat/'+CODE+'/jail').push({j,s,n:(meP()&&meP().name)||NAME,t,r:S.meta.round||0,g:S.meta.gid||'',ts:TS()});return;
+  }
+  if(kind==='wolf'&&jailerOf(ME))return toast('Estás en la cárcel');
+  if(kind==='wolf'&&(myRole()!=='wolf'||S.meta.status!=='night'))return;
+  if(kind==='day'&&S.meta.status!=='day')return;
+  inp.value='';
+  db.ref('wvchat/'+CODE+'/'+kind).push({id:ME,n:(meP()&&meP().name)||NAME,t,r:S.meta.round||0,g:S.meta.gid||'',ts:TS()});
+}
+function share(){
+  const web=/^https?:/.test(location.protocol);const url=web?location.href.split('?')[0]+'?sala='+CODE:'';
+  const txt='¡Únete a mi partida de Wolvevilles! Código de sala: '+CODE;
+  if(navigator.share){navigator.share({title:'Wolvevilles',text:txt,url:url||undefined}).catch(()=>{});}
+  else if(navigator.clipboard){navigator.clipboard.writeText(txt+(url?' '+url:'')).then(()=>toast('Copiado al portapapeles'),()=>toast('Código: '+CODE));}
+  else toast('Código: '+CODE);
+}
+function openRole(r){const d=R[r];if(!d)return;$('m-i').textContent=d.i;$('m-n').textContent=d.n;$('m-n').style.color=d.c;$('m-d').textContent=d.d;$('mbox').style.background=d.bg;$('mbox').style.borderColor=d.br;$('modal').classList.add('on');}
+function showRanks(){
+  $('m-i').textContent='🏆';$('m-n').textContent='Rangos';$('m-n').style.color='#E0B43A';
+  $('m-d').innerHTML=RANKS.map(x=>'<span style="color:'+x[3]+';font-weight:800">'+x[2]+' '+x[1]+'</span> — desde '+x[0]+' SR').join('<br>')
+   +'<br><br><b>Cómo ganar SR</b><br>🏆 Victoria: +20<br>🃏🔥 Victoria con rol solitario: +40<br>❤️ Sobrevivir hasta el final: +5<br>💀 Derrota: −12<br><br><small>Todos empiezan con '+SR_START+' SR. Tu rating se guarda en este dispositivo.</small>';
+  $('mbox').style.background='#141C30';$('mbox').style.borderColor='#E0B43A';$('modal').classList.add('on');
+}
+function showVersion(){
+  $('m-i').textContent='📦';$('m-n').textContent='Wolvevilles v'+VERSION;$('m-n').style.color='#5B8CFF';
+  $('m-d').innerHTML=CHANGELOG.map(([v,t])=>'<b style="color:#E0B43A">v'+v+'</b><br>'+t).join('<br><br>');
+  $('mbox').style.background='#141C30';$('mbox').style.borderColor='#5B8CFF';$('modal').classList.add('on');
+}
+function closeRole(){$('modal').classList.remove('on');}
+
+const A={skip,ver:showVersion,jailpick,jshoot,jspare,sendJail:()=>sendChat('jail'),ranks:showRanks,create,join,leave,rejoin,dismiss,cfg,start,again,ack,wolf,seer,doc,douse,pmode,ignite,vote,shoot,noshoot,share,role:openRole,closeRole,noop(){},sendDay:()=>sendChat('day'),sendWolf:()=>sendChat('wolf')};
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el||el.disabled)return;const fn=A[el.dataset.act];if(!fn)return;e.preventDefault();try{fn(el.dataset.id,el);}catch(err){console.error(err);toast('Error: '+err.message,true);}});
+$('h-name').value=NAME;
+document.querySelectorAll('.ver-lbl').forEach(e=>{e.textContent='Wolvevilles v'+VERSION+' · Ver novedades';});
+$('h-name').addEventListener('keydown',e=>{if(e.key==='Enter')create();});
+$('h-code').addEventListener('input',e=>{e.target.value=e.target.value.toUpperCase().replace(/[^A-Z]/g,'').slice(0,4);});
+$('h-code').addEventListener('keydown',e=>{if(e.key==='Enter')join();});
+$('d-in').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat('day');});
+$('w-in').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat('wolf');});
+$('j-in').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat('jail');});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&CODE&&online)markOnline();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeRole();});
+try{const q=new URLSearchParams(location.search).get('sala');if(q)$('h-code').value=q.toUpperCase().replace(/[^A-Z]/g,'').slice(0,4);}catch(e){}
+window.addEventListener('error',e=>{console.error(e.message);});
+window.addEventListener('unhandledrejection',e=>{console.error(e.reason);});
+checkRejoin();
+</script>
+</body>
+</html>
